@@ -5,8 +5,10 @@
 #include <array>
 
 using namespace std;
-double findFreq(double c, double r1, double r2);
-double findResistance(double c, double r1, double f);
+double findFreq(double c, double r1, double offset, double r2);
+double findResistance2(double c, double r1, double offset, double f);
+double findResistance1(double c, double r2, double offset, double f);
+double findCapacitance(double r1, double r2, double offset, double f);
 void capacitorSet(double capacitor[]);
 //vector<float> frequencies;
 double capacitor[29] {};
@@ -17,6 +19,9 @@ double resistor2[63] {0, 1, 1.2, 1.5, 2, 2.7, 3.3, 4.3, 5.1, 6.8, 8.2, 10, 12, 1
 int main()
 {
     capacitorSet(capacitor);
+    double offset;
+    cout << "Enter an offset in Ohms: ";
+    cin >> offset;
     /* cout << "POTENIOMETER = R1" << endl;
     cout << "________________________________________________________________________________________" << endl;
     for (int i {0}; i <= 28; i ++) {
@@ -27,7 +32,7 @@ int main()
                 //frequencies.push_back(highf);
                 cout << capacitor[i] << "F, " << resistor2[j] << " O = [" << lowf << ", " << highf << "]" << endl;
         }
-    }
+    } 
     cout << endl;
     cout << "POTENIOMETER = R2" << endl;
     cout << "________________________________________________________________________________________" << endl;
@@ -40,21 +45,59 @@ int main()
                 cout << capacitor[i] << " F, " << resistor2[j] << " O = [" << lowf << ", " << highf << "]" << endl;
         }
     } */
+
+    /*
+    cout << "R2 CALCULATIONS" << endl;
+    cout << "________________________________________________________________________________________" << endl;
     for (int i {0}; i <= 28; i ++) {
-            float resistorLow = findResistance(capacitor[i], 0, 1);
-            float resistorHigh = findResistance(capacitor[i], 10000, 60);
-            cout << capacitor[i] << " F, " << "[" << resistorLow << ", " << resistorHigh << "] " << resistorLow - resistorHigh << endl;
+            double resistorLow = findResistance2(capacitor[i], 0, offset, 1);
+            double resistorHigh = findResistance2(capacitor[i], 10000 , offset, 60);
+            cout << capacitor[i] << " F " << "[" << resistorLow << ", " << resistorHigh << "] " << resistorLow - resistorHigh << endl;
         }
+    cout << endl; */
+    /* cout << "R1 CALCULATIONS" << endl;
+    cout << "________________________________________________________________________________________" << endl;
+    for (int i {0}; i <= 28; i ++) {
+            double resistorLow = findResistance1(capacitor[i], 0, offset, 1);
+            double resistorHigh = findResistance1(capacitor[i], 10000 , offset, 60);
+            cout << capacitor[i] << " F " << "[" << resistorLow << ", " << resistorHigh << "] " << resistorLow - resistorHigh << endl;
+        } 
+    cout << endl; */
+
+    cout << "CAPACITOR CALCULATIONS" << endl;
+    cout << "________________________________________________________________________________________" << endl;
+    for (int i {0}; i <= 62; i += 1) {
+        double capacitorLow = findCapacitance(0, resistor2[i], offset, 60);
+        double capacitorHigh = findCapacitance(10000, resistor2[i], offset, 1);
+        cout << resistor2[i] << " O " << "[" << capacitorLow << ", " << capacitorHigh << "]   ";
+        //cout << endl;
+        cout << "[" << findFreq(capacitorLow, 10000, offset, resistor2[i]) << ", ";
+        cout << findFreq(capacitorLow, 0, offset, resistor2[i]) << "]   ";
+        cout << "[" << findFreq(capacitorHigh, 10000, offset, resistor2[i]) << ", ";
+        cout << findFreq(capacitorHigh, 0, offset, resistor2[i]) << "]   " << endl;
+    }
     return 0;
 }
 
-double findFreq(double c, double r1, double r2)
+double findFreq(double c, double r1, double offset, double r2)
 {
+    r1 = r1 + offset;
     return 1.44 / (c * (r1 + r2 + r2));
 }
 
-double findResistance(double c, double r1, double f) {
-    return (0.5) * ((1.44 / (c * f)) - r1);
+double findResistance2(double c, double r1, double offset, double f) {
+    r1 = r1 + offset;
+    return (1.44 - (f * r1 * c)) / (2 * f * c);
+}
+
+double findResistance1(double c, double r2, double offset, double f) {
+    r2 = r2 + offset;
+    return (1.44 / (f * c)) - (2 * r2);
+}
+
+double findCapacitance(double r1, double r2, double offset, double f) {
+    r1 = r1 + offset;
+    return 1.44 / (f * (r1 + r2 + r2));
 }
 
 void capacitorSet(double capacitor[])
